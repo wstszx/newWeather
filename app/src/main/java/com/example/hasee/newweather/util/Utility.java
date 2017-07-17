@@ -1,10 +1,13 @@
 package com.example.hasee.newweather.util;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.example.hasee.newweather.db.City;
 import com.example.hasee.newweather.db.County;
 import com.example.hasee.newweather.db.Province;
+import com.example.hasee.newweather.gson.Weather;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -77,5 +80,20 @@ public class Utility {
             }
         }
         return false;
+    }
+
+    //    将json数据解析成Weather实体类
+    public static Weather handleWeatherResponse(String response){
+        try {
+            JSONObject jsonObject=new JSONObject(response);
+            JSONArray jsonArray = jsonObject.getJSONArray("HeWeather5");
+            String weatherContent = jsonArray.getJSONObject(0).toString();
+            Weather weather = new Gson().fromJson(weatherContent, Weather.class);
+            Log.d("Utility", "weather= "+weather.basic.toString());
+            return weather;
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
