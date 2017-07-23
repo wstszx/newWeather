@@ -131,7 +131,6 @@ public class WeatherActivity extends AppCompatActivity {
 			max_text.setText(forecast.temperature.max);
 			min_text.setText(forecast.temperature.min);
 			forecast_layout.addView(view);
-
 		}
 		if (weather.aqi != null) {
 			aqi_text.setText(weather.aqi.city.aqi);
