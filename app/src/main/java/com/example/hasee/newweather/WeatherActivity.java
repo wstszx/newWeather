@@ -90,21 +90,23 @@ public class WeatherActivity extends AppCompatActivity {
 
 			@Override
 			public void onResponse(Call call, Response response) throws IOException {
-				final String responseText = response.body().string();
-				final Weather weather = Utility.handleWeatherResponse(responseText);
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						if (weather != null && "ok".equals(weather.status)) {
-							SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
-							editor.putString("weather", responseText);
-							editor.apply();
-							showWeatherInfo(weather);
-						} else {
-							Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
+				if (response!=null){
+					final String responseText = response.body().string();
+					final Weather weather = Utility.handleWeatherResponse(responseText);
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							if (weather != null && "ok".equals(weather.status)) {
+								SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
+								editor.putString("weather", responseText);
+								editor.apply();
+								showWeatherInfo(weather);
+							} else {
+								Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
+							}
 						}
-					}
-				});
+					});
+				}
 			}
 		});
 	}
@@ -131,6 +133,7 @@ public class WeatherActivity extends AppCompatActivity {
 			max_text.setText(forecast.temperature.max);
 			min_text.setText(forecast.temperature.min);
 			forecast_layout.addView(view);
+
 		}
 		if (weather.aqi != null) {
 			aqi_text.setText(weather.aqi.city.aqi);
