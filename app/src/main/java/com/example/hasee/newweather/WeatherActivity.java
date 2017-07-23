@@ -90,7 +90,6 @@ public class WeatherActivity extends AppCompatActivity {
 
 			@Override
 			public void onResponse(Call call, Response response) throws IOException {
-				if (response!=null){
 					final String responseText = response.body().string();
 					final Weather weather = Utility.handleWeatherResponse(responseText);
 					runOnUiThread(new Runnable() {
@@ -106,7 +105,6 @@ public class WeatherActivity extends AppCompatActivity {
 							}
 						}
 					});
-				}
 			}
 		});
 	}
