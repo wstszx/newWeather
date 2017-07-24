@@ -9,11 +9,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.hasee.newweather.gson.Forecast;
 import com.example.hasee.newweather.gson.Weather;
 import com.example.hasee.newweather.util.HttpUtil;
@@ -42,6 +44,7 @@ public class WeatherActivity extends AppCompatActivity {
 	private TextView comfort_text;
 	private TextView car_wash_text;
 	private TextView sport_text;
+	private ImageView bing_pic_img;
 
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -59,8 +62,15 @@ public class WeatherActivity extends AppCompatActivity {
 		comfort_text = (TextView) findViewById(R.id.comfort_text);
 		car_wash_text = (TextView) findViewById(R.id.car_wash_text);
 		sport_text = (TextView) findViewById(R.id.sport_text);
+		bing_pic_img = (ImageView) findViewById(R.id.bing_pic_img);
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		String weatherString = prefs.getString("weather", null);
+		String bing_pic = prefs.getString("bing_pic", null);
+		if (bing_pic != null) {
+			Glide.with(this).load(bing_pic).into(bing_pic_img);
+		} else {
+			loadBingPic();
+		}
 		if (weatherString != null) {
 //			有缓存时直接解析天气数据
 			Weather weather = Utility.handleWeatherResponse(weatherString);
@@ -71,6 +81,30 @@ public class WeatherActivity extends AppCompatActivity {
 			weather_layout.setVisibility(View.INVISIBLE);
 			requestWeather(weather_id);
 		}
+	}
+/*加载必应每日一图*/
+	private void loadBingPic() {
+		String requestBingPic = "http://guolin.tech/api/bing_pic";
+		HttpUtil.sendOkHttpRequest(requestBingPic, new Callback() {
+			@Override
+			public void onFailure(Call call, IOException e) {
+
+			}
+
+			@Override
+			public void onResponse(Call call, Response response) throws IOException {
+				final String bingPic = response.body().string();
+				SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
+				edit.putString("bing_pic", bingPic);
+				edit.apply();
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						Glide.with(WeatherActivity.this).load(bingPic).into(bing_pic_img);
+					}
+				});
+			}
+		});
 	}
 
 	//根据天气id请求城市天气信息
@@ -107,6 +141,7 @@ public class WeatherActivity extends AppCompatActivity {
 					});
 			}
 		});
+		loadBingPic();
 	}
 
 	//处理并展示Weather实体类中的数据
