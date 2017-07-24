@@ -1,10 +1,13 @@
 package com.example.hasee.newweather;
 
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -45,10 +48,17 @@ public class WeatherActivity extends AppCompatActivity {
 	private TextView car_wash_text;
 	private TextView sport_text;
 	private ImageView bing_pic_img;
+	private SwipeRefreshLayout swipe_refresh;
+
 
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		if (Build.VERSION.SDK_INT >= 21) {
+			View decorView = getWindow().getDecorView();
+			decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+			getWindow().setStatusBarColor(Color.TRANSPARENT);
+		}
 		setContentView(R.layout.activity_weather);
 //		初始化各控件
 		weather_layout = (ScrollView) findViewById(R.id.weather_layout);
@@ -63,9 +73,12 @@ public class WeatherActivity extends AppCompatActivity {
 		car_wash_text = (TextView) findViewById(R.id.car_wash_text);
 		sport_text = (TextView) findViewById(R.id.sport_text);
 		bing_pic_img = (ImageView) findViewById(R.id.bing_pic_img);
+		swipe_refresh = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
+		swipe_refresh.setColorSchemeResources(R.color.colorPrimary);
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		String weatherString = prefs.getString("weather", null);
 		String bing_pic = prefs.getString("bing_pic", null);
+		final String weatherId;
 		if (bing_pic != null) {
 			Glide.with(this).load(bing_pic).into(bing_pic_img);
 		} else {
@@ -74,13 +87,20 @@ public class WeatherActivity extends AppCompatActivity {
 		if (weatherString != null) {
 //			有缓存时直接解析天气数据
 			Weather weather = Utility.handleWeatherResponse(weatherString);
+			weatherId = weather.basic.weatherId;
 			showWeatherInfo(weather);
 		} else {
 //			无缓存时去服务器查询天气
-			String weather_id = getIntent().getStringExtra("weather_id");
+			weatherId = getIntent().getStringExtra("weather_id");
 			weather_layout.setVisibility(View.INVISIBLE);
-			requestWeather(weather_id);
+			requestWeather(weatherId);
 		}
+		swipe_refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+			@Override
+			public void onRefresh() {
+				requestWeather(weatherId);
+			}
+		});
 	}
 /*加载必应每日一图*/
 	private void loadBingPic() {
@@ -118,6 +138,7 @@ public class WeatherActivity extends AppCompatActivity {
 					@Override
 					public void run() {
 						Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
+						swipe_refresh.setRefreshing(false);
 					}
 				});
 			}
@@ -137,6 +158,7 @@ public class WeatherActivity extends AppCompatActivity {
 							} else {
 								Toast.makeText(WeatherActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
 							}
+							swipe_refresh.setRefreshing(false);
 						}
 					});
 			}
