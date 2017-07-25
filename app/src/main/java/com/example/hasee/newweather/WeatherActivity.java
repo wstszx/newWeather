@@ -7,11 +7,14 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -48,7 +51,9 @@ public class WeatherActivity extends AppCompatActivity {
 	private TextView car_wash_text;
 	private TextView sport_text;
 	private ImageView bing_pic_img;
-	private SwipeRefreshLayout swipe_refresh;
+	public SwipeRefreshLayout swipe_refresh;
+	public DrawerLayout drawer_layout;
+	private Button bt_home;
 
 
 	@Override
@@ -75,6 +80,14 @@ public class WeatherActivity extends AppCompatActivity {
 		bing_pic_img = (ImageView) findViewById(R.id.bing_pic_img);
 		swipe_refresh = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
 		swipe_refresh.setColorSchemeResources(R.color.colorPrimary);
+		drawer_layout = (DrawerLayout) findViewById(R.id.drawer_layout);
+		bt_home = (Button) findViewById(R.id.bt_home);
+		bt_home.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				drawer_layout.openDrawer(GravityCompat.START);
+			}
+		});
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		String weatherString = prefs.getString("weather", null);
 		String bing_pic = prefs.getString("bing_pic", null);
@@ -128,7 +141,7 @@ public class WeatherActivity extends AppCompatActivity {
 	}
 
 	//根据天气id请求城市天气信息
-	private void requestWeather(String weather_id) {
+	public void requestWeather(String weather_id) {
 		String weatherUrl = "https://free-api.heweather.com/v5/weather?city=" + weather_id + "&key=a795978046234cc7aa101abb628f280f";
 		Log.d("WeatherActivity", "weatherUrl="+weatherUrl);
 		HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
