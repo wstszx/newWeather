@@ -1,5 +1,6 @@
 package com.example.hasee.newweather;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -24,6 +25,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.hasee.newweather.gson.Forecast;
 import com.example.hasee.newweather.gson.Weather;
+import com.example.hasee.newweather.service.AutoUpdateService;
 import com.example.hasee.newweather.util.HttpUtil;
 import com.example.hasee.newweather.util.Utility;
 
@@ -181,6 +183,8 @@ public class WeatherActivity extends AppCompatActivity {
 
 	//处理并展示Weather实体类中的数据
 	private void showWeatherInfo(Weather weather) {
+		Intent intent = new Intent(this, AutoUpdateService.class);
+		startService(intent);
 		String cityName = weather.basic.cityName;
 		String updateTime = weather.basic.update.updateTime.split(" ")[1];
 		String degree = weather.now.temperature + "℃";
